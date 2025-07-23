@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chemistry Tutor - Interactive Learning</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.1);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            position: relative;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; border-radius: 50%; animation: float-particles 20s infinite linear; box-shadow: 0 0 10px currentColor; }
+        .particle:nth-child(1) { width: 6px; height: 6px; background: #ff6b6b; left: 10%; animation-duration: 15s; }
+        .particle:nth-child(2) { width: 4px; height: 4px; background: #4ecdc4; left: 20%; animation-duration: 18s; }
+        .particle:nth-child(3) { width: 8px; height: 8px; background: #45b7d1; left: 30%; animation-duration: 22s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; background: #96ceb4; left: 40%; animation-duration: 16s; }
+        .particle:nth-child(5) { width: 7px; height: 7px; background: #feca57; left: 50%; animation-duration: 20s; }
+        .particle:nth-child(6) { width: 4px; height: 4px; background: #ff9ff3; left: 60%; animation-duration: 19s; }
+        .particle:nth-child(7) { width: 6px; height: 6px; background: #54a0ff; left: 70%; animation-duration: 17s; }
+        .particle:nth-child(8) { width: 5px; height: 5px; background: #5f27cd; left: 80%; animation-duration: 21s; }
+        .particle:nth-child(9) { width: 8px; height: 8px; background: #00d2d3; left: 90%; animation-duration: 14s; }
+        .particle:nth-child(10) { width: 4px; height: 4px; background: #ff9ff3; left: 15%; animation-duration: 23s; }
+        .particle:nth-child(11) { width: 5px; height: 5px; background: #ff6b6b; left: 25%; animation-duration: 17s; }
+        .particle:nth-child(12) { width: 7px; height: 7px; background: #4ecdc4; left: 35%; animation-duration: 19s; }
+        .particle:nth-child(13) { width: 4px; height: 4px; background: #45b7d1; left: 45%; animation-duration: 21s; }
+        .particle:nth-child(14) { width: 6px; height: 6px; background: #96ceb4; left: 55%; animation-duration: 16s; }
+        .particle:nth-child(15) { width: 8px; height: 8px; background: #feca57; left: 65%; animation-duration: 18s; }
+        @keyframes float-particles {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            animation: rainbowText 3s ease-in-out infinite, textFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+        }
+
+        @keyframes rainbowText {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes textFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.8s ease-out, cardGlow 4s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            border-radius: 22px;
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes cardGlow {
+            0%, 100% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(255, 107, 107, 0.3); }
+            25% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(78, 205, 196, 0.3); }
+            50% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(69, 183, 209, 0.3); }
+            75% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(150, 206, 180, 0.3); }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .equation-input {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: 'Inter', monospace;
+        }
+
+        .equation-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .advanced-tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .advanced-tools .btn {
+            font-size: 0.9rem;
+            padding: 10px 16px;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            animation: buttonGradient 2s ease-in-out infinite;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6), 0 0 20px rgba(78, 205, 196, 0.4);
+        }
+
+        @keyframes buttonGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+        }
+
+        .example-equations {
+            margin-top: 25px;
+        }
+
+        .example-equations h3 {
+            color: #64748b;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .example-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-family: 'Inter', monospace;
+            font-size: 0.95rem;
+        }
+
+        .example-btn:hover {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .molecule-display {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .molecule-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .molecule {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+            animation: moleculeFloat 4s ease-in-out infinite;
+        }
+
+        .atom {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin: 0 3px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 20px currentColor;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: atomPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes atomPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .atom:hover {
+            transform: scale(1.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .coefficient {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-right: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .arrow {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 30px;
+            animation: arrowPulse 2s infinite, rainbowArrow 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.5));
+        }
+
+        @keyframes rainbowArrow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .plus-sign {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .full-width-card {
+            grid-column: 1 / -1;
+        }
+
+        .step {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 0 12px 12px 0;
+            transition: all 0.3s ease;
+            animation: stepSlide 0.5s ease-out;
+        }
+
+        .step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .ai-tutor {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 400% 400%;
+            animation: aiGradient 6s ease-in-out infinite;
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 40px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes aiGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .ai-tutor h2 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .ai-response {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-display {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(255, 215, 0, 0.4);
+            text-align: center;
+            z-index: 1000;
+            animation: scoreGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes scoreGlow {
+            0%, 100% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 40px rgba(255, 107, 107, 0.6); }
+        }
+
+        .score-display h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes moleculeFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        @keyframes stepSlide {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .periodic-table {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .periodic-table.show {
+            display: block;
+            animation: zoomIn 0.3s ease-out;
+        }
+
+        .element {
+            width: 50px;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .element:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .quiz-mode {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            max-width: 600px;
+            width: 90vw;
+        }
+
+        .quiz-mode.show {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.8);
+            border-color: #10b981;
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.8);
+            border-color: #ef4444;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1999;
+        }
+
+        .modal-overlay.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--error);
+            transform: scale(1.1);
+        }
+
+        .reaction-type-result {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .molar-mass-result {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2.5rem; }
+            .button-group { flex-direction: column; }
+            .advanced-tools { flex-direction: column; }
+            .score-display { top: 15px; right: 15px; padding: 15px; }
+            .molecule-container { flex-direction: column; }
+            .arrow { transform: rotate(90deg); margin: 20px 0; }
+            .periodic-table { padding: 15px; }
+            .quiz-mode { padding: 20px; }
+        }
+    </style>
+    <!-- Add this in the <head> section -->
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 AI Chemistry Tutor</h1>
+            <p>Master chemical equations with stunning visualizations and intelligent guidance</p>
+        </div>
+        <div class="score-display">
+            <h3>🏆 Score</h3>
+            <div class="score" id="score">0</div>
+        </div>
+        <div class="main-grid">
+            <div class="card input-section">
+                <h2>⚗️ Enter Chemical Equation</h2>
+                <input type="text" class="equation-input" id="equationInput" placeholder="e.g., H2 + O2 → H2O">
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="analyzeEquation()">🔍 Analyze</button>
+                    <button class="btn btn-primary" onclick="balanceEquation()">⚖️ Balance</button>
+                    <button class="btn btn-primary" onclick="showFormationAnimation()">🎬 Show Formation</button>
+                    <button class="btn btn-secondary" onclick="clearEquation()">🗑️ Clear</button>
+                </div>
+                <div class="advanced-tools">
+                    <button class="btn btn-secondary" onclick="togglePeriodicTable()">📊 Periodic Table</button>
+                    <button class="btn btn-secondary" onclick="startQuizMode()">🎯 Quiz Mode</button>
+                </div>
+                <div class="example-equations">
+                    <h3>💡 Try these examples:</h3>
+                    <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #0ea5e9;">
+                        <strong>📝 Sample Input:</strong> H2 + O2 → H2O<br>
+                        <strong>📊 Expected Output:</strong> Shows H: 2 vs H: 2, O: 2 vs O: 1 (unbalanced)<br>
+                        <strong>⚖️ After Balance:</strong> 2H₂ + O₂ → 2H₂O (balanced)
+                    </div>
+                    <button class="example-btn" onclick="loadExample('H2 + O2 → H2O')">H₂ + O₂ → H₂O (Water formation) - Try this first!</button>
+                    <button class="example-btn" onclick="loadExample('CH4 + O2 → CO2 + H2O')">CH₄ + O₂ → CO₂ + H₂O (Combustion)</button>
+                    <button class="example-btn" onclick="loadExample('NaCl + AgNO3 → AgCl + NaNO3')">NaCl + AgNO₃ → AgCl + NaNO₃ (Already balanced!)</button>
+                    <button class="example-btn" onclick="loadExample('N2 + H2 → NH3')">N₂ + H₂ → NH₃ (Ammonia synthesis)</button>
+                    <button class="example-btn" onclick="loadExample('CaCO3 → CaO + CO2')">CaCO₃ → CaO + CO₂ (Decomposition)</button>
+                </div>
+            </div>
+            <div class="card visualization-section">
+                <h2>🔬 Molecular Visualization</h2>
+                <div class="molecule-display" id="moleculeDisplay">
+                    <p style="color: #64748b; font-size: 1.1rem;">Enter an equation to see the molecular magic ✨</p>
+                </div>
+            </div>
+        </div>
+        <div class="card full-width-card steps-section">
+            <h2>📋 Step-by-Step Analysis</h2>
+            <div id="stepsContainer">
+                <p style="color: #64748b; font-size: 1.1rem;">Steps will appear here when you analyze an equation 🚀</p>
+            </div>
+        </div>
+        <div class="ai-tutor">
+            <h2>🤖 AI Chemistry Assistant</h2>
+            <p>Ask me anything about chemistry concepts, reactions, or equations!</p>
+            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.2);">
+                <strong>💡 Quick Start Guide:</strong><br>
+                1️⃣ Click "H₂ + O₂ → H₂O" example above<br>
+                2️⃣ Click "Analyze" to see atom counting<br>
+                3️⃣ Click "Balance" to get the balanced equation<br>
+                4️⃣ Ask me questions like "Why is this exothermic?"
+            </div>
+            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.2);">
+                <strong>🔥 Try asking me:</strong><br>
+                • "Why is this reaction exothermic?"<br>
+                • "What is a catalyst?"<br>
+                • "How do I balance equations?"<br>
+                • "What is combustion?"<br>
+                • "Help" - for more options
+            </div>
+            <input type="text" class="equation-input" id="questionInput" placeholder="e.g., Why is this reaction exothermic?" style="margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="askAI()" style="margin-top: 15px;">💬 Ask AI</button>
+            <div class="ai-response" id="aiResponse" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
+
+    <!-- Periodic Table Modal -->
+    <div class="periodic-table" id="periodicTable">
+        <button class="close-btn" onclick="closeAllModals()">&times;</button>
+        <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;">🧪 Interactive Periodic Table</h2>
+        <div id="periodicElements"></div>
+    </div>
+
+    <!-- Quiz Mode Modal -->
+    <div class="quiz-mode" id="quizMode">
+        <button class="close-btn" onclick="closeAllModals()" style="color: white;">&times;</button>
+        <h2 style="margin-bottom: 20px;">🎯 Chemistry Quiz</h2>
+        <div class="progress-bar">
+            <div class="progress-fill" id="quizProgress" style="width: 0%;"></div>
+        </div>
+        <div id="quizContent">
+            <p>Loading quiz...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentScore = 0;
+        let currentEquation = '';
+
+        const groupColors = {
+          alkali: '#a55eea',
+          alkaline: '#96ceb4',
+          transition: '#778ca3',
+          post_transition: '#b2bec3',
+          metalloid: '#feca57',
+          nonmetal: '#45b7d1',
+          halogen: '#ff6b6b',
+          noble: '#ff9ff3',
+          lanthanide: '#00b894',
+          actinide: '#fdcb6e',
+          unknown: '#636e72'
+        };
+        const atomData = {
+          'H':   { color: groupColors.nonmetal, name: 'hydrogen', symbol: 'H', mass: 1.008, number: 1 },
+          'He':  { color: groupColors.noble, name: 'helium', symbol: 'He', mass: 4.0026, number: 2 },
+          'Li':  { color: groupColors.alkali, name: 'lithium', symbol: 'Li', mass: 6.94, number: 3 },
+          'Be':  { color: groupColors.alkaline, name: 'beryllium', symbol: 'Be', mass: 9.0122, number: 4 },
+          'B':   { color: groupColors.metalloid, name: 'boron', symbol: 'B', mass: 10.81, number: 5 },
+          'C':   { color: groupColors.nonmetal, name: 'carbon', symbol: 'C', mass: 12.011, number: 6 },
+          'N':   { color: groupColors.nonmetal, name: 'nitrogen', symbol: 'N', mass: 14.007, number: 7 },
+          'O':   { color: groupColors.nonmetal, name: 'oxygen', symbol: 'O', mass: 15.999, number: 8 },
+          'F':   { color: groupColors.halogen, name: 'fluorine', symbol: 'F', mass: 18.998, number: 9 },
+          'Ne':  { color: groupColors.noble, name: 'neon', symbol: 'Ne', mass: 20.180, number: 10 },
+          'Na':  { color: groupColors.alkali, name: 'sodium', symbol: 'Na', mass: 22.990, number: 11 },
+          'Mg':  { color: groupColors.alkaline, name: 'magnesium', symbol: 'Mg', mass: 24.305, number: 12 },
+          'Al':  { color: groupColors.post_transition, name: 'aluminum', symbol: 'Al', mass: 26.982, number: 13 },
+          'Si':  { color: groupColors.metalloid, name: 'silicon', symbol: 'Si', mass: 28.085, number: 14 },
+          'P':   { color: groupColors.nonmetal, name: 'phosphorus', symbol: 'P', mass: 30.974, number: 15 },
+          'S':   { color: groupColors.nonmetal, name: 'sulfur', symbol: 'S', mass: 32.06, number: 16 },
+          'Cl':  { color: groupColors.halogen, name: 'chlorine', symbol: 'Cl', mass: 35.45, number: 17 },
+          'Ar':  { color: groupColors.noble, name: 'argon', symbol: 'Ar', mass: 39.948, number: 18 },
+          'K':   { color: groupColors.alkali, name: 'potassium', symbol: 'K', mass: 39.098, number: 19 },
+          'Ca':  { color: groupColors.alkaline, name: 'calcium', symbol: 'Ca', mass: 40.078, number: 20 },
+          'Sc':  { color: groupColors.transition, name: 'scandium', symbol: 'Sc', mass: 44.956, number: 21 },
+          'Ti':  { color: groupColors.transition, name: 'titanium', symbol: 'Ti', mass: 47.867, number: 22 },
+          'V':   { color: groupColors.transition, name: 'vanadium', symbol: 'V', mass: 50.942, number: 23 },
+          'Cr':  { color: groupColors.transition, name: 'chromium', symbol: 'Cr', mass: 51.996, number: 24 },
+          'Mn':  { color: groupColors.transition, name: 'manganese', symbol: 'Mn', mass: 54.938, number: 25 },
+          'Fe':  { color: groupColors.transition, name: 'iron', symbol: 'Fe', mass: 55.845, number: 26 },
+          'Co':  { color: groupColors.transition, name: 'cobalt', symbol: 'Co', mass: 58.933, number: 27 },
+          'Ni':  { color: groupColors.transition, name: 'nickel', symbol: 'Ni', mass: 58.693, number: 28 },
+          'Cu':  { color: groupColors.transition, name: 'copper', symbol: 'Cu', mass: 63.546, number: 29 },
+          'Zn':  { color: groupColors.transition, name: 'zinc', symbol: 'Zn', mass: 65.38, number: 30 },
+          'Ga':  { color: groupColors.post_transition, name: 'gallium', symbol: 'Ga', mass: 69.723, number: 31 },
+          'Ge':  { color: groupColors.metalloid, name: 'germanium', symbol: 'Ge', mass: 72.630, number: 32 },
+          'As':  { color: groupColors.metalloid, name: 'arsenic', symbol: 'As', mass: 74.922, number: 33 },
+          'Se':  { color: groupColors.nonmetal, name: 'selenium', symbol: 'Se', mass: 78.971, number: 34 },
+          'Br':  { color: groupColors.halogen, name: 'bromine', symbol: 'Br', mass: 79.904, number: 35 },
+          'Kr':  { color: groupColors.noble, name: 'krypton', symbol: 'Kr', mass: 83.798, number: 36 },
+          'Rb':  { color: groupColors.alkali, name: 'rubidium', symbol: 'Rb', mass: 85.468, number: 37 },
+          'Sr':  { color: groupColors.alkaline, name: 'strontium', symbol: 'Sr', mass: 87.62, number: 38 },
+          'Y':   { color: groupColors.transition, name: 'yttrium', symbol: 'Y', mass: 88.906, number: 39 },
+          'Zr':  { color: groupColors.transition, name: 'zirconium', symbol: 'Zr', mass: 91.224, number: 40 },
+          'Nb':  { color: groupColors.transition, name: 'niobium', symbol: 'Nb', mass: 92.906, number: 41 },
+          'Mo':  { color: groupColors.transition, name: 'molybdenum', symbol: 'Mo', mass: 95.95, number: 42 },
+          'Tc':  { color: groupColors.transition, name: 'technetium', symbol: 'Tc', mass: 98, number: 43 },
+          'Ru':  { color: groupColors.transition, name: 'ruthenium', symbol: 'Ru', mass: 101.07, number: 44 },
+          'Rh':  { color: groupColors.transition, name: 'rhodium', symbol: 'Rh', mass: 102.91, number: 45 },
+          'Pd':  { color: groupColors.transition, name: 'palladium', symbol: 'Pd', mass: 106.42, number: 46 },
+          'Ag':  { color: groupColors.transition, name: 'silver', symbol: 'Ag', mass: 107.87, number: 47 },
+          'Cd':  { color: groupColors.transition, name: 'cadmium', symbol: 'Cd', mass: 112.41, number: 48 },
+          'In':  { color: groupColors.post_transition, name: 'indium', symbol: 'In', mass: 114.82, number: 49 },
+          'Sn':  { color: groupColors.post_transition, name: 'tin', symbol: 'Sn', mass: 118.71, number: 50 },
+          'Sb':  { color: groupColors.metalloid, name: 'antimony', symbol: 'Sb', mass: 121.76, number: 51 },
+          'Te':  { color: groupColors.metalloid, name: 'tellurium', symbol: 'Te', mass: 127.60, number: 52 },
+          'I':   { color: groupColors.halogen, name: 'iodine', symbol: 'I', mass: 126.90, number: 53 },
+          'Xe':  { color: groupColors.noble, name: 'xenon', symbol: 'Xe', mass: 131.29, number: 54 },
+          'Cs':  { color: groupColors.alkali, name: 'cesium', symbol: 'Cs', mass: 132.91, number: 55 },
+          'Ba':  { color: groupColors.alkaline, name: 'barium', symbol: 'Ba', mass: 137.33, number: 56 },
+          'La':  { color: groupColors.lanthanide, name: 'lanthanum', symbol: 'La', mass: 138.91, number: 57 },
+          'Ce':  { color: groupColors.lanthanide, name: 'cerium', symbol: 'Ce', mass: 140.12, number: 58 },
+          'Pr':  { color: groupColors.lanthanide, name: 'praseodymium', symbol: 'Pr', mass: 140.91, number: 59 },
+          'Nd':  { color: groupColors.lanthanide, name: 'neodymium', symbol: 'Nd', mass: 144.24, number: 60 },
+          'Pm':  { color: groupColors.lanthanide, name: 'promethium', symbol: 'Pm', mass: 145, number: 61 },
+          'Sm':  { color: groupColors.lanthanide, name: 'samarium', symbol: 'Sm', mass: 150.36, number: 62 },
+          'Eu':  { color: groupColors.lanthanide, name: 'europium', symbol: 'Eu', mass: 151.98, number: 63 },
+          'Gd':  { color: groupColors.lanthanide, name: 'gadolinium', symbol: 'Gd', mass: 157.25, number: 64 },
+          'Tb':  { color: groupColors.lanthanide, name: 'terbium', symbol: 'Tb', mass: 158.93, number: 65 },
+          'Dy':  { color: groupColors.lanthanide, name: 'dysprosium', symbol: 'Dy', mass: 162.50, number: 66 },
+          'Ho':  { color: groupColors.lanthanide, name: 'holmium', symbol: 'Ho', mass: 164.93, number: 67 },
+          'Er':  { color: groupColors.lanthanide, name: 'erbium', symbol: 'Er', mass: 167.26, number: 68 },
+          'Tm':  { color: groupColors.lanthanide, name: 'thulium', symbol: 'Tm', mass: 168.93, number: 69 },
+          'Yb':  { color: groupColors.lanthanide, name: 'ytterbium', symbol: 'Yb', mass: 173.05, number: 70 },
+          'Lu':  { color: groupColors.lanthanide, name: 'lutetium', symbol: 'Lu', mass: 174.97, number: 71 },
+          'Hf':  { color: groupColors.transition, name: 'hafnium', symbol: 'Hf', mass: 178.49, number: 72 },
+          'Ta':  { color: groupColors.transition, name: 'tantalum', symbol: 'Ta', mass: 180.95, number: 73 },
+          'W':   { color: groupColors.transition, name: 'tungsten', symbol: 'W', mass: 183.84, number: 74 },
+          'Re':  { color: groupColors.transition, name: 'rhenium', symbol: 'Re', mass: 186.21, number: 75 },
+          'Os':  { color: groupColors.transition, name: 'osmium', symbol: 'Os', mass: 190.23, number: 76 },
+          'Ir':  { color: groupColors.transition, name: 'iridium', symbol: 'Ir', mass: 192.22, number: 77 },
+          'Pt':  { color: groupColors.transition, name: 'platinum', symbol: 'Pt', mass: 195.08, number: 78 },
+          'Au':  { color: groupColors.transition, name: 'gold', symbol: 'Au', mass: 196.97, number: 79 },
+          'Hg':  { color: groupColors.transition, name: 'mercury', symbol: 'Hg', mass: 200.59, number: 80 },
+          'Tl':  { color: groupColors.post_transition, name: 'thallium', symbol: 'Tl', mass: 204.38, number: 81 },
+          'Pb':  { color: groupColors.post_transition, name: 'lead', symbol: 'Pb', mass: 207.2, number: 82 },
+          'Bi':  { color: groupColors.post_transition, name: 'bismuth', symbol: 'Bi', mass: 208.98, number: 83 },
+          'Po':  { color: groupColors.post_transition, name: 'polonium', symbol: 'Po', mass: 209, number: 84 },
+          'At':  { color: groupColors.halogen, name: 'astatine', symbol: 'At', mass: 210, number: 85 },
+          'Rn':  { color: groupColors.noble, name: 'radon', symbol: 'Rn', mass: 222, number: 86 },
+          'Fr':  { color: groupColors.alkali, name: 'francium', symbol: 'Fr', mass: 223, number: 87 },
+          'Ra':  { color: groupColors.alkaline, name: 'radium', symbol: 'Ra', mass: 226, number: 88 },
+          'Ac':  { color: groupColors.actinide, name: 'actinium', symbol: 'Ac', mass: 227, number: 89 },
+          'Th':  { color: groupColors.actinide, name: 'thorium', symbol: 'Th', mass: 232.04, number: 90 },
+          'Pa':  { color: groupColors.actinide, name: 'protactinium', symbol: 'Pa', mass: 231.04, number: 91 },
+          'U':   { color: groupColors.actinide, name: 'uranium', symbol: 'U', mass: 238.03, number: 92 },
+          'Np':  { color: groupColors.actinide, name: 'neptunium', symbol: 'Np', mass: 237, number: 93 },
+          'Pu':  { color: groupColors.actinide, name: 'plutonium', symbol: 'Pu', mass: 244, number: 94 },
+          'Am':  { color: groupColors.actinide, name: 'americium', symbol: 'Am', mass: 243, number: 95 },
+          'Cm':  { color: groupColors.actinide, name: 'curium', symbol: 'Cm', mass: 247, number: 96 },
+          'Bk':  { color: groupColors.actinide, name: 'berkelium', symbol: 'Bk', mass: 247, number: 97 },
+          'Cf':  { color: groupColors.actinide, name: 'californium', symbol: 'Cf', mass: 251, number: 98 },
+          'Es':  { color: groupColors.actinide, name: 'einsteinium', symbol: 'Es', mass: 252, number: 99 },
+          'Fm':  { color: groupColors.actinide, name: 'fermium', symbol: 'Fm', mass: 257, number: 100 },
+          'Md':  { color: groupColors.actinide, name: 'mendelevium', symbol: 'Md', mass: 258, number: 101 },
+          'No':  { color: groupColors.actinide, name: 'nobelium', symbol: 'No', mass: 259, number: 102 },
+          'Lr':  { color: groupColors.actinide, name: 'lawrencium', symbol: 'Lr', mass: 266, number: 103 },
+          'Rf':  { color: groupColors.transition, name: 'rutherfordium', symbol: 'Rf', mass: 267, number: 104 },
+          'Db':  { color: groupColors.transition, name: 'dubnium', symbol: 'Db', mass: 270, number: 105 },
+          'Sg':  { color: groupColors.transition, name: 'seaborgium', symbol: 'Sg', mass: 271, number: 106 },
+          'Bh':  { color: groupColors.transition, name: 'bohrium', symbol: 'Bh', mass: 270, number: 107 },
+          'Hs':  { color: groupColors.transition, name: 'hassium', symbol: 'Hs', mass: 277, number: 108 },
+          'Mt':  { color: groupColors.transition, name: 'meitnerium', symbol: 'Mt', mass: 278, number: 109 },
+          'Ds':  { color: groupColors.transition, name: 'darmstadtium', symbol: 'Ds', mass: 281, number: 110 },
+          'Rg':  { color: groupColors.transition, name: 'roentgenium', symbol: 'Rg', mass: 282, number: 111 },
+          'Cn':  { color: groupColors.post_transition, name: 'copernicium', symbol: 'Cn', mass: 285, number: 112 },
+          'Fl':  { color: groupColors.post_transition, name: 'flerovium', symbol: 'Fl', mass: 289, number: 114 },
+          'Lv':  { color: groupColors.post_transition, name: 'livermorium', symbol: 'Lv', mass: 293, number: 116 },
+          'Ts':  { color: groupColors.halogen, name: 'tennessine', symbol: 'Ts', mass: 294, number: 117 },
+          'Og':  { color: groupColors.noble, name: 'oganesson', symbol: 'Og', mass: 294, number: 118 }
+        };
+
+        let currentQuiz = {
+            questions: [],
+            currentQuestion: 0,
+            score: 0,
+            total: 0
+        };
+
+        function loadExample(equation) {
+            document.getElementById('equationInput').value = equation;
+            setTimeout(() => analyzeEquation(), 300);
+        }
+
+        function clearEquation() {
+            document.getElementById('equationInput').value = '';
+            document.getElementById('moleculeDisplay').innerHTML = '<p style="color: #64748b; font-size: 1.1rem;">Enter an equation to see the molecular magic ✨</p>';
+            document.getElementById('stepsContainer').innerHTML = '<p style="color: #64748b; font-size: 1.1rem;">Steps will appear here when you analyze an equation 🚀</p>';
+        }
+
+        function parseEquation(equation) {
+            const cleanEquation = equation.replace(/\s+/g, ' ').trim();
+            const sides = cleanEquation.split(/→|->/).map(s => s.trim());
+            if (sides.length !== 2) return null;
+            const parseCompounds = (side) => side.split('+').map(compound => compound.trim()).filter(c => c.length > 0);
+            return { reactants: parseCompounds(sides[0]), products: parseCompounds(sides[1]) };
+        }
+
+        function parseMolecule(molecule) {
+            const coefficientMatch = molecule.match(/^(\d+)\s*(.+)$/);
+            let coefficient = 1, formula = molecule;
+            if (coefficientMatch) {
+                coefficient = parseInt(coefficientMatch[1]);
+                formula = coefficientMatch[2];
+            }
+            const atoms = [];
+            const atomMatches = formula.match(/([A-Z][a-z]?)(\d*)/g) || [];
+            atomMatches.forEach(atomMatch => {
+                const parts = atomMatch.match(/([A-Z][a-z]?)(\d*)/);
+                const element = parts[1];
+                const count = parts[2] ? parseInt(parts[2]) : 1;
+                for (let i = 0; i < count; i++) atoms.push(element);
+            });
+            return { coefficient, formula, atoms };
+        }
+
+        function analyzeEquation() {
+            const equation = document.getElementById('equationInput').value.trim();
+            if (!equation) {
+                alert('Please enter a chemical equation!');
+                return;
+            }
+            const parsed = parseEquation(equation);
+            if (!parsed) {
+                alert('Please enter a valid chemical equation (use → for the arrow)');
+                return;
+            }
+            showMolecularVisualization(parsed);
+            showAnalysisSteps(parsed);
+            updateScore(5);
+        }
+
+        function showMolecularVisualization(parsed) {
+            let html = '<div class="molecule-container">';
+            parsed.reactants.forEach((reactant, index) => {
+                const moleculeData = parseMolecule(reactant);
+                html += createMoleculeHTML(moleculeData);
+                if (index < parsed.reactants.length - 1) html += '<span class="plus-sign">+</span>';
+            });
+            html += '<span class="arrow">→</span>';
+            parsed.products.forEach((product, index) => {
+                const moleculeData = parseMolecule(product);
+                html += createMoleculeHTML(moleculeData);
+                if (index < parsed.products.length - 1) html += '<span class="plus-sign">+</span>';
+            });
+            html += '</div>';
+            document.getElementById('moleculeDisplay').innerHTML = html;
+        }
+
+        function createMoleculeHTML(moleculeData) {
+            let html = '<div class="molecule">';
+            if (moleculeData.coefficient > 1) html += `<span class="coefficient">${moleculeData.coefficient}</span>`;
+            moleculeData.atoms.forEach(atom => {
+                const atomInfo = atomData[atom] || { color: '#95a5a6', name: 'unknown', symbol: atom };
+                html += `<div class="atom ${atomInfo.name}" style="background: ${atomInfo.color}">${atom}</div>`;
+            });
+            return html + '</div>';
+        }
+
+        function countAtoms(compounds) {
+            const atomCount = {};
+            compounds.forEach(compound => {
+                const moleculeData = parseMolecule(compound);
+                const totalAtoms = [];
+                for (let i = 0; i < moleculeData.coefficient; i++) totalAtoms.push(...moleculeData.atoms);
+                totalAtoms.forEach(atom => atomCount[atom] = (atomCount[atom] || 0) + 1);
+            });
+            return atomCount;
+        }
+
+        function showAnalysisSteps(parsed) {
+            const reactantAtoms = countAtoms(parsed.reactants);
+            const productAtoms = countAtoms(parsed.products);
+            const isBalanced = checkBalance(reactantAtoms, productAtoms);
+            const steps = [
+                { title: "🔍 Identify Components", description: `Reactants: ${parsed.reactants.join(' + ')} → Products: ${parsed.products.join(' + ')}` },
+                { title: "🧮 Count Atoms - Reactants", description: `Left side: ${formatAtomCount(reactantAtoms)}` },
+                { title: "🧮 Count Atoms - Products", description: `Right side: ${formatAtomCount(productAtoms)}` },
+                { title: "⚖️ Check Balance", description: isBalanced ? "✅ BALANCED! Equal atoms on both sides" : "❌ NOT BALANCED! Atoms don't match" },
+                { title: isBalanced ? "✅ Equation Complete" : "🔧 Needs Balancing", description: isBalanced ? "This equation follows the law of conservation of mass" : "Click 'Balance' button to fix the coefficients" }
+            ];
+            let html = '';
+            steps.forEach((step, index) => {
+                html += `<div class="step"><span class="step-number">${index + 1}</span><strong>${step.title}</strong><br><span style="color: #64748b; margin-left: 50px;">${step.description}</span></div>`;
+            });
+            document.getElementById('stepsContainer').innerHTML = html;
+        }
+
+        function formatAtomCount(atomCount) {
+            return Object.entries(atomCount).map(([atom, count]) => `${atom}: ${count}`).join(', ');
+        }
+
+        function checkBalance(reactantAtoms, productAtoms) {
+            const allAtoms = new Set([...Object.keys(reactantAtoms), ...Object.keys(productAtoms)]);
+            for (let atom of allAtoms) {
+                if ((reactantAtoms[atom] || 0) !== (productAtoms[atom] || 0)) return false;
+            }
+            return true;
+        }
+
+        function balanceEquation() {
+            const equation = document.getElementById('equationInput').value.trim();
+            if (!equation) {
+                alert('Please enter an equation first!');
+                return;
+            }
+            const balancedEquations = {
+                'H2 + O2 → H2O': '2H₂ + O₂ → 2H₂O',
+                'CH4 + O2 → CO2 + H2O': 'CH₄ + 2O₂ → CO₂ + 2H₂O',
+                'N2 + H2 → NH3': 'N₂ + 3H₂ → 2NH₃',
+                'NaCl + AgNO3 → AgCl + NaNO3': 'NaCl + AgNO₃ → AgCl + NaNO₃',
+                'CaCO3 → CaO + CO2': 'CaCO₃ → CaO + CO₂'
+            };
+            const balanced = balancedEquations[equation];
+            if (balanced) {
+                document.getElementById('equationInput').value = balanced;
+                analyzeEquation();
+                updateScore(15);
+                alert('Equation balanced successfully! 🎉');
+            } else {
+                alert('This equation is not in our database yet. Try the examples!');
+            }
+        }
+
+        function showFormationAnimation() {
+            const equation = document.getElementById('equationInput').value.trim();
+            if (!equation) {
+                alert('Please enter an equation first!');
+                return;
+            }
+            
+            // Show loading animation
+            document.getElementById('moleculeDisplay').innerHTML = `
+                <div style="text-align: center; padding: 50px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 20px; color: #667eea; font-size: 1.2rem;">⚛️ Animating molecular formation...</p>
+                    <p style="margin-top: 10px; color: #64748b; font-size: 0.9rem;">Watch atoms come together to form molecules!</p>
+                </div>
+            `;
+            
+            // Stage 1: Show reactants approaching
+            setTimeout(() => {
+                document.getElementById('moleculeDisplay').innerHTML = `
+                    <div style="text-align: center; padding: 30px;">
+                        <h3 style="color: #667eea; margin-bottom: 20px;">🔬 Stage 1: Reactants Approaching</h3>
+                        <div style="display: flex; justify-content: space-around; align-items: center; margin: 30px 0;">
+                            <div style="animation: slideInLeft 1s ease-out;">⚛️ Reactants</div>
+                            <div style="font-size: 2rem; animation: pulse 1s infinite;">→</div>
+                            <div style="animation: slideInRight 1s ease-out;">🧪 Products</div>
+                        </div>
+                    </div>
+                `;
+            }, 1000);
+            
+            // Stage 2: Show collision
+            setTimeout(() => {
+                document.getElementById('moleculeDisplay').innerHTML = `
+                    <div style="text-align: center; padding: 30px;">
+                        <h3 style="color: #667eea; margin-bottom: 20px;">💥 Stage 2: Molecular Collision</h3>
+                        <div style="font-size: 4rem; animation: bounce 0.5s ease-in-out 3;">💥</div>
+                        <p style="color: #64748b; margin-top: 15px;">Atoms collide and bonds break/form!</p>
+                    </div>
+                `;
+            }, 2500);
+            
+            // Stage 3: Show final products with actual molecular visualization
+            setTimeout(() => {
+                document.getElementById('moleculeDisplay').innerHTML = `
+                    <div style="text-align: center; padding: 30px;">
+                        <h3 style="color: #10b981; margin-bottom: 20px;">✅ Stage 3: Products Formed!</h3>
+                        <div style="font-size: 3rem; margin: 20px 0; animation: zoomIn 0.8s ease-out;">🎉</div>
+                        <p style="color: #64748b;">New molecules successfully created!</p>
+                    </div>
+                `;
+                
+                // After animation, show the actual molecular analysis
+                setTimeout(() => {
+                    analyzeEquation();
+                    updateScore(10);
+                }, 1000);
+            }, 4000);
+            
+            // Add CSS animations for the formation stages
+            if (!document.getElementById('formationAnimations')) {
+                const style = document.createElement('style');
+                style.id = 'formationAnimations';
+                style.textContent = `
+                    @keyframes slideInLeft {
+                        from { transform: translateX(-100px); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideInRight {
+                        from { transform: translateX(100px); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes pulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.2); }
+                    }
+                    @keyframes bounce {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-20px); }
+                    }
+                    @keyframes zoomIn {
+                        from { transform: scale(0); opacity: 0; }
+                        to { transform: scale(1); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function askAI() {
+            const question = document.getElementById('questionInput').value.trim();
+            if (!question) {
+                alert('Please ask a question!');
+                return;
+            }
+            const aiResponseDiv = document.getElementById('aiResponse');
+            aiResponseDiv.innerHTML = '<div class="loading"></div> <span style="color: rgba(255,255,255,0.9);">AI is thinking...</span>';
+            aiResponseDiv.style.display = 'block';
+            
+            const responses = {
+                'exothermic': {
+                    answer: 'This reaction releases energy because the bonds formed in the products are stronger than those broken in the reactants. The excess energy is released as heat, making the surroundings warmer.<br><br><strong>Example:</strong> CH₄ + 2O₂ → CO₂ + 2H₂O + heat',
+                    emoji: '🔥'
+                },
+                'endothermic': {
+                    answer: 'This reaction absorbs energy because more energy is needed to break the reactant bonds than is released when product bonds form. The surroundings become cooler.<br><br><strong>Example:</strong> CaCO₃ + heat → CaO + CO₂',
+                    emoji: '❄️'
+                },
+                'catalyst': {
+                    answer: 'A catalyst speeds up the reaction by providing an alternative pathway with lower activation energy. It participates in the reaction but is regenerated, so it\'s not consumed overall.<br><br><strong>Example:</strong> 2H₂O₂ → 2H₂O + O₂ (with MnO₂ catalyst)',
+                    emoji: '⚡'
+                },
+                'balance': {
+                    answer: 'Balancing equations ensures the law of conservation of mass is followed. The number of atoms of each element must be equal on both sides of the equation.<br><br><strong>Steps:</strong> 1) Count atoms 2) Add coefficients 3) Check balance',
+                    emoji: '⚖️'
+                },
+                'combustion': {
+                    answer: 'Combustion reactions involve a substance reacting with oxygen to produce heat and light. Complete combustion of hydrocarbons produces CO₂ and H₂O.<br><br><strong>General form:</strong> Fuel + O₂ → CO₂ + H₂O + energy',
+                    emoji: '🔥'
+                },
+                'water': {
+                    answer: 'Water formation: 2H₂ + O₂ → 2H₂O. This combines hydrogen and oxygen gases to form liquid water. It\'s highly exothermic and was used in rocket fuel!',
+                    emoji: '💧'
+                },
+                'help': {
+                    answer: 'I can help with:<br>• Balancing equations<br>• Explaining reaction types<br>• Understanding chemical concepts<br>• Atom counting<br><br><strong>Try asking:</strong> "Why is this exothermic?" or "How do I balance this?"',
+                    emoji: '❓'
+                }
+            };
+            
+            setTimeout(() => {
+                let response = {
+                    answer: 'Great question! In chemical reactions, atoms are rearranged but never created or destroyed (Law of Conservation of Mass). This fundamental principle is why we balance equations - to ensure equal numbers of each type of atom on both sides.<br><br><strong>Try asking about:</strong> exothermic, endothermic, catalysts, or combustion!',
+                    emoji: '🧪'
+                };
+                
+                for (let key in responses) {
+                    if (question.toLowerCase().includes(key)) {
+                        response = responses[key];
+                        break;
+                    }
+                }
+                
+                aiResponseDiv.innerHTML = `
+                    <div style="display: flex; align-items: flex-start; gap: 15px; animation: slideUp 0.5s ease-out;">
+                        <div style="font-size: 2rem;">${response.emoji}</div>
+                        <div style="flex: 1;">
+                            <strong style="color: rgba(255,255,255,0.95);">AI Assistant:</strong><br>
+                            <div style="color: rgba(255,255,255,0.9); margin-top: 8px; line-height: 1.5;">${response.answer}</div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('questionInput').value = '';
+                updateScore(3);
+            }, 1500);
+        }
+
+        function updateScore(points) {
+            currentScore += points;
+            document.getElementById('score').textContent = currentScore;
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.width = (Math.random() * 8 + 3) + 'px';
+                particle.style.height = particle.style.width;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Advanced Features Functions
+        function detectReactionType() {
+            const equation = document.getElementById('equationInput').value.trim();
+            if (!equation) {
+                alert('Please enter an equation first!');
+                return;
+            }
+            const parsed = parseEquation(equation);
+            if (!parsed) {
+                alert('Please enter a valid chemical equation!');
+                return;
+            }
+            let reactionType = 'Unknown';
+            let description = '';
+            let emoji = '🧬';
+            if (parsed.reactants.length === 1 && parsed.products.length > 1) {
+                reactionType = 'Decomposition';
+                description = 'A single compound breaks down into two or more simpler substances.';
+                emoji = '💥';
+            } else if (parsed.reactants.length > 1 && parsed.products.length === 1) {
+                reactionType = 'Synthesis/Combination';
+                description = 'Two or more simple substances combine to form a more complex compound.';
+                emoji = '🔗';
+            } else if (equation.includes('O2') && (equation.includes('CO2') || equation.includes('H2O'))) {
+                reactionType = 'Combustion';
+                description = 'A substance reacts with oxygen, typically producing CO₂ and H₂O with energy release.';
+                emoji = '🔥';
+            } else if (parsed.reactants.length === 2 && parsed.products.length === 2) {
+                reactionType = 'Double Displacement';
+                description = 'Two compounds exchange ions to form two new compounds.';
+                emoji = '🔄';
+            } else {
+                reactionType = 'Single Displacement';
+                description = 'One element replaces another element in a compound.';
+                emoji = '↔️';
+            }
+            // Remove any existing reaction-type-result
+            document.querySelectorAll('.reaction-type-result').forEach(el => el.remove());
+            // Display result
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'reaction-type-result';
+            resultDiv.innerHTML = `
+                <h3>${emoji} Reaction Type: ${reactionType}</h3>
+                <p>${description}</p>
+                <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                    <strong>Example characteristics:</strong><br>
+                    ${getReactionCharacteristics(reactionType)}
+                </div>
+            `;
+            document.getElementById('stepsContainer').appendChild(resultDiv);
+            updateScore(8);
+        }
+
+        function getReactionCharacteristics(type) {
+            const characteristics = {
+                'Decomposition': '• Usually requires energy input (heat, light, electricity)<br>• AB → A + B<br>• Examples: electrolysis, thermal decomposition',
+                'Synthesis/Combination': '• Often releases energy (exothermic)<br>• A + B → AB<br>• Examples: metal + oxygen → metal oxide',
+                'Combustion': '• Always involves oxygen<br>• Releases heat and light<br>• Fuel + O₂ → CO₂ + H₂O + energy',
+                'Double Displacement': '• Often occurs in aqueous solutions<br>• AB + CD → AD + CB<br>• May form precipitate, gas, or water',
+                'Single Displacement': '• More reactive element displaces less reactive<br>• A + BC → AC + B<br>• Follows activity series'
+            };
+            return characteristics[type] || 'General chemical reaction';
+        }
+
+        function togglePeriodicTable() {
+            const table = document.getElementById('periodicTable');
+            const overlay = document.getElementById('modalOverlay');
+            if (!table.classList.contains('show')) {
+                generatePeriodicTable();
+                table.classList.add('show');
+                overlay.classList.add('show');
+            } else {
+                closeAllModals();
+            }
+        }
+
+        function generatePeriodicTable() {
+            const container = document.getElementById('periodicElements');
+            // Full periodic table layout: 7 periods, 18 groups, 118 elements, empty strings for gaps
+            const elements = [
+                // Period 1
+                'H', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'He',
+                // Period 2
+                'Li', 'Be', '', '', '', '', '', '', 'B', 'C', 'N', 'O', 'F', 'Ne', '', '', '', '',
+                // Period 3
+                'Na', 'Mg', '', '', '', '', '', '', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', '', '', '', '',
+                // Period 4
+                'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr',
+                // Period 5
+                'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe',
+                // Period 6
+                'Cs', 'Ba', '', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn',
+                // Period 7
+                'Fr', 'Ra', '', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Fl', 'Lv', 'Ts', 'Og', '', ''
+            ];
+            let html = '<div style="display: grid; grid-template-columns: repeat(18, 1fr); gap: 3px; max-width: 900px;">';
+            elements.forEach((element, index) => {
+                if (element && atomData[element]) {
+                    const data = atomData[element];
+                    html += `<div class="element" style="background: ${data.color}; color: white;" onclick="showElementInfo('${element}')" title="${data.name} (${data.symbol}) - Mass: ${data.mass}"><div style="font-size: 0.7rem;">${data.number}</div><div style="font-size: 1rem; font-weight: bold;">${element}</div></div>`;
+                } else {
+                    html += '<div></div>';
+                }
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function showElementInfo(symbol) {
+            const data = atomData[symbol];
+            if (data) {
+                alert(`${data.name} (${data.symbol})\n\nAtomic Number: ${data.number}\nAtomic Mass: ${data.mass}\n\nClick to add to equation!`);
+                const input = document.getElementById('equationInput');
+                input.value += symbol;
+                input.focus();
+            }
+        }
+
+        function startQuizMode() {
+            const quiz = document.getElementById('quizMode');
+            const overlay = document.getElementById('modalOverlay');
+            generateQuiz();
+            quiz.classList.add('show');
+            overlay.classList.add('show');
+        }
+
+        function generateQuiz() {
+            currentQuiz.questions = [
+                { question: "What type of reaction is: 2H₂ + O₂ → 2H₂O?", options: ["Decomposition", "Synthesis", "Combustion", "Single Displacement"], correct: 1, explanation: "This is a synthesis reaction where hydrogen and oxygen combine to form water." },
+                { question: "Which element has the atomic number 6?", options: ["Nitrogen", "Carbon", "Oxygen", "Boron"], correct: 1, explanation: "Carbon has 6 protons, giving it atomic number 6." },
+                { question: "What is the molar mass of water (H₂O)?", options: ["16 g/mol", "18 g/mol", "20 g/mol", "22 g/mol"], correct: 1, explanation: "H₂O = 2(1.008) + 15.999 ≈ 18 g/mol" },
+                { question: "In a balanced equation, what is conserved?", options: ["Energy only", "Mass only", "Both mass and atoms", "Volume only"], correct: 2, explanation: "Both mass and the number of atoms of each element are conserved." },
+                { question: "What happens in a combustion reaction?", options: ["Compounds break apart", "Elements combine", "Substance reacts with oxygen", "Ions exchange"], correct: 2, explanation: "Combustion involves a substance reacting with oxygen, usually producing heat and light." }
+            ];
+            currentQuiz.currentQuestion = 0;
+            currentQuiz.score = 0;
+            currentQuiz.total = currentQuiz.questions.length;
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            const question = currentQuiz.questions[currentQuiz.currentQuestion];
+            const progress = ((currentQuiz.currentQuestion) / currentQuiz.total) * 100;
+            document.getElementById('quizProgress').style.width = progress + '%';
+            let html = `<h3>Question ${currentQuiz.currentQuestion + 1} of ${currentQuiz.total}</h3><p style="font-size: 1.1rem; margin: 20px 0;">${question.question}</p><div id="quizOptions">`;
+            question.options.forEach((option, index) => {
+                html += `<div class="quiz-option" onclick="selectQuizAnswer(${index})">${String.fromCharCode(65 + index)}. ${option}</div>`;
+            });
+            html += '</div>';
+            document.getElementById('quizContent').innerHTML = html;
+        }
+
+        function selectQuizAnswer(selectedIndex) {
+            const question = currentQuiz.questions[currentQuiz.currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => option.style.pointerEvents = 'none');
+            options[selectedIndex].classList.add(selectedIndex === question.correct ? 'correct' : 'incorrect');
+            options[question.correct].classList.add('correct');
+            if (selectedIndex === question.correct) currentQuiz.score++;
+            setTimeout(() => {
+                const explanation = document.createElement('div');
+                explanation.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;';
+                explanation.innerHTML = `<strong>Explanation:</strong> ${question.explanation}`;
+                document.getElementById('quizOptions').appendChild(explanation);
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'btn btn-secondary';
+                nextBtn.style.cssText = 'margin-top: 15px; background: rgba(255,255,255,0.3); color: white; border: none;';
+                nextBtn.textContent = currentQuiz.currentQuestion < currentQuiz.total - 1 ? 'Next Question' : 'Finish Quiz';
+                nextBtn.onclick = () => {
+                    if (currentQuiz.currentQuestion < currentQuiz.total - 1) {
+                        currentQuiz.currentQuestion++;
+                        showQuizQuestion();
+                    } else {
+                        showQuizResults();
+                    }
+                };
+                document.getElementById('quizContent').appendChild(nextBtn);
+            }, 1500);
+        }
+
+        function showQuizResults() {
+            const percentage = Math.round((currentQuiz.score / currentQuiz.total) * 100);
+            let grade = 'Try Again';
+            let emoji = '📚';
+            if (percentage >= 90) { grade = 'Excellent!'; emoji = '🏆'; }
+            else if (percentage >= 80) { grade = 'Great Job!'; emoji = '🎉'; }
+            else if (percentage >= 70) { grade = 'Good Work!'; emoji = '👍'; }
+            else if (percentage >= 60) { grade = 'Not Bad!'; emoji = '👌'; }
+            document.getElementById('quizProgress').style.width = '100%';
+            document.getElementById('quizContent').innerHTML = `<div style="text-align: center;"><h2>${emoji} Quiz Complete!</h2><div style="font-size: 3rem; margin: 20px 0;">${percentage}%</div><h3>${grade}</h3><p>You scored ${currentQuiz.score} out of ${currentQuiz.total} questions correctly!</p><button class="btn btn-secondary" onclick="startQuizMode()" style="margin: 20px 10px; background: rgba(255,255,255,0.3); color: white; border: none;">Try Again</button><button class="btn btn-secondary" onclick="closeAllModals()" style="margin: 20px 10px; background: rgba(255,255,255,0.3); color: white; border: none;">Close</button></div>`;
+        }
+
+        function calculateMolarMass() {
+            const equation = document.getElementById('equationInput').value.trim();
+            if (!equation) {
+                alert('Please enter an equation first!');
+                return;
+            }
+            const parsed = parseEquation(equation);
+            if (!parsed) {
+                alert('Please enter a valid chemical equation!');
+                return;
+            }
+            let html = '<div class="molar-mass-result"><h3>⚖️ Molar Mass Calculations</h3>';
+            const allCompounds = [...parsed.reactants, ...parsed.products];
+            allCompounds.forEach(compound => {
+                const moleculeData = parseMolecule(compound);
+                let totalMass = 0;
+                let calculation = '';
+                const atomCounts = {};
+                moleculeData.atoms.forEach(atom => {
+                    atomCounts[atom] = (atomCounts[atom] || 0) + 1;
+                });
+                Object.entries(atomCounts).forEach(([atom, count]) => {
+                    const atomInfo = atomData[atom];
+                    if (atomInfo) {
+                        const mass = atomInfo.mass * count;
+                        totalMass += mass;
+                        calculation += `${count > 1 ? count : ''}${atom}: ${count} × ${atomInfo.mass} = ${mass.toFixed(3)} g/mol<br>`;
+                    }
+                });
+                html += `<div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;"><strong>${compound}:</strong><br>${calculation}<strong>Total: ${totalMass.toFixed(3)} g/mol</strong></div>`;
+            });
+            html += '</div>';
+            // Remove all previous molar-mass-result divs
+            document.querySelectorAll('.molar-mass-result').forEach(el => el.remove());
+            // Add new result at the end of stepsContainer
+            const stepsContainer = document.getElementById('stepsContainer');
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            stepsContainer.appendChild(div.firstChild);
+        }
+
+        function closeAllModals() {
+            document.getElementById('periodicTable').classList.remove('show');
+            document.getElementById('quizMode').classList.remove('show');
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        // Enhanced particle creation with more variety
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3'];
+            const symbols = ['⚛️', '🧪', '⚗️', '🔬', '💧', '🔥', '❄️', '⭐', '💎'];
+            
+            // Create regular particles
+            for (let i = 0; i < 60; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.width = (Math.random() * 8 + 3) + 'px';
+                particle.style.height = particle.style.width;
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Create special symbol particles
+            for (let i = 0; i < 15; i++) {
+                const symbol = document.createElement('div');
+                symbol.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+                symbol.style.position = 'absolute';
+                symbol.style.left = Math.random() * 100 + '%';
+                symbol.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                symbol.style.animation = `float-particles ${Math.random() * 15 + 15}s infinite linear`;
+                symbol.style.animationDelay = Math.random() * 20 + 's';
+                symbol.style.opacity = '0.7';
+                symbol.style.pointerEvents = 'none';
+                particlesContainer.appendChild(symbol);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            document.getElementById('equationInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') analyzeEquation();
+            });
+            document.getElementById('questionInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') askAI();
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'Enter': analyzeEquation(); e.preventDefault(); break;
+                        case 'b': balanceEquation(); e.preventDefault(); break;
+                        case 'p': togglePeriodicTable(); e.preventDefault(); break;
+                        case 'q': startQuizMode(); e.preventDefault(); break;
+                    }
+                }
+                if (e.key === 'Escape') closeAllModals();
+            });
+        });
+    </script>
+</body>
+</html>
